@@ -1,0 +1,17 @@
+# Variáveis de ambiente com senhas
+.env
+
+# Pastas de build e dependências de pacotes
+node_modules/
+dist/
+__pycache__/
+*.pyc
+env/
+venv/
+.env.local
+.env.production
+.env.development
+
+# Arquivos de autenticação do bot WhatsApp (se criados na raiz por engano)
+.wwebjs_auth/
+.wwebjs_cache/

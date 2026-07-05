@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # 1. Banco de Dados MySQL
+  db:
+    image: mysql:8.0
+    container_name: ftv-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "${PORT_DB:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Bot de WhatsApp (Puppeteer/Node)
+  whatsapp-bot:
+    build: ./FtvGonzaga-whatsapp
+    container_name: ftv-whatsapp-bot
+    restart: unless-stopped
+    ports:
+      - "${PORT_WHATSAPP:-3001}:3001"
+    volumes:
+      - whatsapp_session:/app/.wwebjs_auth
+      - whatsapp_cache:/app/.wwebjs_cache
+
+  # 3. API Backend Flask
+  api:
+    build: ./FtvGonzaga-api
+    container_name: ftv-api
+    restart: unless-stopped
+    ports:
+      - "${PORT_API:-5000}:5000"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@db/${MYSQL_DATABASE}
+      - WHATSAPP_SERVICE_URL=http://whatsapp-bot:3001/send
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+      whatsapp-bot:
+        condition: service_started
+
+  # 4. Frontend React (Nginx)
+  frontend:
+    build:
+      context: ./FTVGonzaga
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+    container_name: ftv-frontend
+    restart: unless-stopped
+    ports:
+      - "${PORT_FRONTEND:-80}:80"
+    depends_on:
+      - api
+
+volumes:
+  mysql_data:
+  whatsapp_session:
+  whatsapp_cache:
