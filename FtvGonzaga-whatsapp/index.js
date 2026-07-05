@@ -37,6 +37,20 @@ client.on('auth_failure', msg => {
     console.error('AUTHENTICATION FAILURE', msg);
 });
 
+const fs = require('fs');
+const path = require('path');
+
+// Limpa o arquivo de trava (SingletonLock) do Chromium para evitar erro de reinicialização no Docker
+try {
+    const lockPath = path.join(__dirname, '.wwebjs_auth', 'session', 'SingletonLock');
+    if (fs.existsSync(lockPath)) {
+        fs.unlinkSync(lockPath);
+        console.log('Trava de sessão antiga (SingletonLock) removida com sucesso!');
+    }
+} catch (err) {
+    console.log('Aviso ao limpar trava de sessão antiga (pode ser ignorado):', err.message);
+}
+
 console.log('Inicializando cliente do WhatsApp. Isso pode demorar um pouco na primeira vez, pois ele baixa o navegador Chromium nos bastidores...');
 client.initialize();
 console.log('Aguardando geração do QR Code...');
