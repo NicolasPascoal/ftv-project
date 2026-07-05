@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environment
+env/
+venv/
+.env/
+
+# Flask / general
+instance/
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# PyCharm / VSCode / IDE
+.idea/
+.vscode/
+*.iml
+
+# Mac / Linux
+.DS_Store
+*.swp
+*.swo
+
+# Pipenv / Poetry
+Pipfile.lock
+poetry.lock
+
+# Byte-compiled / cache
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
